@@ -16,3 +16,16 @@ Differences
 The main difference is that the this project does not use a guest agent on the
 host machines. Instead all the commands to manage the instances are done either
 thru ssh or the console on the compute hosts.
+
+Hacking
+-------
+
+First setup the environment to use dtrove:
+
+    $ mkvirtualenv dtrove -r requirements.txt
+
+Then setup the initial data and databases:
+
+    $ fab install
+
+Then do stuff
