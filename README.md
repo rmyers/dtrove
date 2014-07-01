@@ -1,6 +1,8 @@
 dtrove
 ======
 
+[![Build Status](https://travis-ci.org/rmyers/dtrove.svg?branch=master)](https://travis-ci.org/rmyers/dtrove)
+
 Fork of openstack trove written in Django
 
 API
