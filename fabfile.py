@@ -21,14 +21,9 @@ def pep8():
 
 
 @task
-def test(coverage='False', skip_js='False'):
+def test(skip_js='False'):
     """Run the test suite"""
-    if coverage != 'False':
-        local("rm -rf htmlcov")
-        local("coverage run --include='dtrove*' --omit='*migration*' manage.py test")
-        local("coverage html")
-    else:
-        local("python manage.py test dtrove")
+    local("coverage run --include='dtrove*' --omit='*migration*' manage.py test dtrove")
     if skip_js == 'False':
         pass
         # TODO: (rmyers): if we include js then handle that here

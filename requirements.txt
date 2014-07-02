@@ -2,3 +2,6 @@ https://www.djangoproject.com/download/1.7c1/tarball/#egg=Django
 fabric
 celery
 pep8
+coverage
+coveralls
+

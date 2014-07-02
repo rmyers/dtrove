@@ -2,6 +2,7 @@ dtrove
 ======
 
 [![Build Status](https://travis-ci.org/rmyers/dtrove.svg?branch=master)](https://travis-ci.org/rmyers/dtrove)
+[![Coverage Status](https://coveralls.io/repos/rmyers/dtrove/badge.png)](https://coveralls.io/r/rmyers/dtrove)
 
 Fork of openstack trove written in Django
 
