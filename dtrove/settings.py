@@ -36,6 +36,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'openstack_auth',
+    'dtrove',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -81,3 +83,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# OPENSTACK AUTH
+OPENSTACK_KEYSTONE_URL = "https://identity.api.rackspacecloud.com/v2.0"
+AUTHENTICATION_BACKENDS = [
+    'openstack_auth.backend.KeystoneBackend',
+]
+AVAILABLE_REGIONS = [
+    ("https://identity.api.rackspacecloud.com/v2.0", 'ORD'),
+    ("https://identity.api.rackspacecloud.com/v2.0", 'DFW'),
+]
