@@ -2,10 +2,12 @@
 
 {% block content %}
 <div class='row'>
+    <div class="span12">
   <form method="POST" action='.'>
       {% csrf_token %}
   {{ form.as_ul }}
   <input type="submit" />
   </form>
+  </div>
 </div>
 {% endblock %}
