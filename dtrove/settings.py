@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
@@ -54,6 +55,10 @@ ROOT_URLCONF = 'dtrove.urls'
 
 WSGI_APPLICATION = 'dtrove.wsgi.application'
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+SESSION_SAVE_EVERY_REQUEST = True
+LOGIN_REDIRECT_URL = '/'
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
@@ -87,9 +92,14 @@ STATIC_URL = '/static/'
 # OPENSTACK AUTH
 OPENSTACK_KEYSTONE_URL = "https://identity.api.rackspacecloud.com/v2.0"
 AUTHENTICATION_BACKENDS = [
-    'openstack_auth.backend.KeystoneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    'dtrove.auth.RaxBackend',
 ]
 AVAILABLE_REGIONS = [
     ("https://identity.api.rackspacecloud.com/v2.0", 'ORD'),
     ("https://identity.api.rackspacecloud.com/v2.0", 'DFW'),
 ]
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
