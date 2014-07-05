@@ -81,11 +81,10 @@ class RaxBackend(KeystoneBackend):
             auth_url)
 
         if request is not None:
-            request.session['unscoped_token'] = unscoped_token.id
-            request.user = user
+            auth_user.set_session_from_user(request, user)
 
             # Support client caching to save on auth calls.
             setattr(request, KEYSTONE_CLIENT_ATTR, client)
 
-        LOG.debug('Authentication completed for user "%s".' % username)
+        logging.error('Authentication completed for user "%s".' % username)
         return user
