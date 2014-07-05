@@ -10,7 +10,6 @@ urlpatterns = patterns(
     url(r'^$', 'dtrove.views.home', name='home'),
     url(r'^signin/$', auth_views.login,
         {'authentication_form': KeystoneForm},
-        name="signin",
-    ),
+        name="signin"),
     url(r'^admin/', include(admin.site.urls)),
 )
