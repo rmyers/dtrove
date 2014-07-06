@@ -33,6 +33,13 @@ def test(skip_js='False'):
 
 
 @task
+def docs():
+    """Build the docs"""
+    with lcd('docs'):
+        local('make html')
+
+
+@task
 def install():
     """Install the node_modules dependencies"""
     local('git submodule update --init')
