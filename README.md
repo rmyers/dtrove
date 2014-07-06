@@ -4,17 +4,9 @@ dtrove
 [![Build Status](https://travis-ci.org/rmyers/dtrove.svg?branch=master)](https://travis-ci.org/rmyers/dtrove)
 [![Coverage Status](https://coveralls.io/repos/rmyers/dtrove/badge.png)](https://coveralls.io/r/rmyers/dtrove)
 
-Fork of openstack trove written in Django
+Fork of [openstack trove](http://wiki.openstack.org/wiki/Trove) written in Django
 
-API
----
 
-The v1 api is mostly consistent with the trove api. You can see the api here:
-
-   [trove api](http://wiki.openstack.org/wiki/Trove)
-
-Differences
------------
 
 The main difference is that the this project does not use a guest agent on the
 host machines. Instead all the commands to manage the instances are done either
@@ -32,30 +24,24 @@ Then setup the initial data and databases:
     $ fab install
 
 Setup Management API
--------------------
+---------------------
 
 The main way to run dtrove is in single superuser. Basically using the same
 account to create all database clusters. All actions are handled thru the
 management api.
 
-To setup single user mode just add a .supernova conf in the home directory of
-the user that runs the server. Using supernova allows you to use multiple
-accounts or services easily. Here is a example config:
+To setup single user mode just add a few settings in your django settings
+file. For Nova set the following:
 
-    [nova]
-    OS_USERNAME = {my_username}
-    OS_API_KEY = {my_api_key}
-    OS_TENANT_NAME = {my_tenant}
-    OS_PROJECT_ID = {my_project}
-    NOVA_URL='https://identity.api.rackspacecloud.com/v2.0'
+* `NOVA_USERNAME`: OS_USERNAME of the nova user.
+* `NOVA_PASSWORD`: OS_PASSWORD for the nova user.
+* `NOVA_PROJECT_ID`: OS_TENANT_ID or OS_PROJECT_ID of the nova user.
+* `NOVA_URL`: The url of the identity service for nova.
+* `NOVA_BYPASS_URL`: Actual url to use instead of the endpoint from the catalog.
+* `NOVA_ENDPOINT_TYPE`: (publicURL) Type of the nova endpoint.
 
-    [cinder]
-    OS_EXECUTABLE = cinder
-    OS_USERNAME = {my_username}
-    OS_API_KEY = {my_api_key}
-    OS_TENANT_NAME = {my_tenant}
-    OS_PROJECT_ID = {my_project}
-    CINDER_URL='https://identity.api.rackspacecloud.com/v2.0'
+If you are missing one and they are required to run you will receive a runtime
+error with the appropriate list of settings you are missing.
 
 Management Method
 -----------------
@@ -64,8 +50,8 @@ There are two ways to manage the hosts in dtrove. There is no guest agent in
 dtrove which is by design as the server is the brain of the operation and tells
 the guests what to do.
 
-* SSH: A special user is added to the hosts with sudo access and public key auth.
-* Console: If you have access to the compute hosts you can run a remote worker.
+* `SSH`: A special user is added to the hosts with sudo access and public key auth.
+* `Console`: If you have access to the compute hosts you can run a remote worker.
 
 For running with ssh you'll need to create a public/private ssh key:
 
