@@ -2,6 +2,9 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
+from django import forms
+
+from dtrove.models import Datastore
 
 
 class KeystoneForm(AuthenticationForm):
@@ -29,3 +32,10 @@ class KeystoneForm(AuthenticationForm):
                 self.confirm_login_allowed(self.user_cache)
 
         return self.cleaned_data
+
+
+class ClusterForm(forms.Form):
+    name = forms.CharField(max_length=100)
+    datastore = forms.ModelChoiceField(
+        queryset=Datastore.objects.all(), empty_label='Choose a Datastore')
+    key = forms.CharField()
