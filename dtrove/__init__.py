@@ -24,6 +24,14 @@ def _get(name, default=None, warn=False):
     return getattr(settings, name, default)
 
 
+# Default set of datastore managers used in choice field
+_MANAGERS = [
+    ('dtrove.datastores.mysql.MySQLManager', 'mysql'),
+    ('dtrove.datastores.redis.RedisManager', 'redis'),
+    ('dtrove.datastores.pgsql.PostgresManager', 'postgres')
+]
+
+
 class config():
     """
     This defines the available options to configure dtrove.
@@ -48,3 +56,9 @@ class config():
 
     #: Type of the nova endpoint.
     NOVA_ENDPOINT_TYPE = _get('NOVA_ENDPOINT_TYPE', 'publicURL')
+
+    #: List of available datastores. This should be a list of tuples::
+    #:
+    #:     [('path.to.Manager', 'manager_name'), ...]
+    #:
+    DTROVE_DATASTORE_MANAGERS = _get('DTROVE_DATASTORE_MANAGERS', _MANAGERS)

@@ -6,10 +6,10 @@
 Welcome to DTrove's documentation!
 ==================================
 
-Contents:
 
 .. toctree::
-   :maxdepth: 2
+   datastores
+   :maxdepth: 1
 
 
 .. automodule:: dtrove
