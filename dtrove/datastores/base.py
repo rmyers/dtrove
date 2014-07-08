@@ -28,7 +28,7 @@ More on templates later.
 
 """
 
-from CStringIO import StringIO
+from cStringIO import StringIO
 
 from fabric.api import env, run, sudo, put, get
 
@@ -37,9 +37,8 @@ class BaseManager(object):
     """Manager Base
 
     :param datastore: The actual datastore version that is being managed.
-
-    The datastores have the image and package information to install on the
-    guest vm's. This class defines all the interactions with the guest.
+                      The datastores have the image and package information to
+                      install on the guest vm's.
     """
 
     def __init__(self, datastore):
