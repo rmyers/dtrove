@@ -1,6 +1,5 @@
 
 from django.db import models
-from django.utils.module_loading import import_string
 
 from dtrove import config
 
@@ -73,6 +72,7 @@ class Datastore(models.Model):
     @property
     def manager(self):
         """The manager object initialize with this datastores information"""
+        from django.utils.module_loading import import_string
         return import_string(self.manager_class)(self)
 
     @property
