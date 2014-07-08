@@ -9,6 +9,7 @@ Welcome to DTrove's documentation!
 
 .. toctree::
    datastores
+   models
    :maxdepth: 1
 
 
