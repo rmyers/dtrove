@@ -30,13 +30,19 @@ More on templates later.
 
 
 class BaseManager(object):
-    """Base Manager Class"""
+    """Manager Base
 
-    def __init__(self, instance, host=None, key=None):
+    :param datastore: The actual datastore version that is being managed.
+
+    The datastores have the image and package information to install on the
+    guest vm's. This class defines all the interactions with the guest.
+    """
+
+    def __init__(self, datastore):
         """Creates a Manager"""
-        self.instance = instance
-        self.host = host
-        self.key = key
+        self.datastore = datastore
+        self.image = datastore.image
+        self.packages = datastore.packages
 
     @property
     def name(self):
