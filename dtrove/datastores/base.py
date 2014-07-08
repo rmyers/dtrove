@@ -30,8 +30,6 @@ More on templates later.
 
 from cStringIO import StringIO
 
-from fabric.api import env, run, sudo, put, get
-
 
 class BaseManager(object):
     """Manager Base
