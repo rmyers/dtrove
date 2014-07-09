@@ -19,7 +19,7 @@ def create_cluster(name='test_cluster', datastore=None):
 
 def create_key(name='testkey', passphrase='none', private='sec', public='pub'):
     return models.Key(name=name,
-                      passphase=passphrase,
+                      passphrase=passphrase,
                       private=private,
                       public=public)
 

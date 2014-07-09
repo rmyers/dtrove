@@ -202,7 +202,7 @@ class Instance(models.Model):
         """Provides the connection info from the key stored for this server"""
         kwargs = {
             'key': self.key.private,
-            'password': self.key.passphase,
+            'password': self.key.passphrase,
             'host_string': '%s@%s' % (self.user, self.addr),
         }
         return kwargs
