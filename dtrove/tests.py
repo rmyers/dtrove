@@ -61,6 +61,9 @@ class ClusterModelTests(TestCase):
     def test_unicode(self):
         self.assertEqual(u'test_cluster', unicode(self.cluster))
 
+    def test_status(self):
+        self.assertEqual(u'spawning', self.cluster.status)
+
 
 class DatastoreModelTests(TestCase):
 
