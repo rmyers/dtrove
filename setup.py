@@ -8,6 +8,6 @@ setup(
     packages = find_packages(),
     #install_requires = ['docutils>=0.3'],
     package_data = {
-        '': ['*.html],
+        '': ['*.html'],
     },
 )
