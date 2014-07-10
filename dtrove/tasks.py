@@ -14,8 +14,10 @@ from __future__ import absolute_import
 
 from celery import shared_task
 from fabric.api import run, env, settings, prefix
+from fabric.network import disconnect_all
 
 from dtrove import config
+from dtrove.models import Instance
 
 
 @shared_task
@@ -49,3 +51,10 @@ def preform(instance_id, name, *cmds):
          [root@10.0.0.1] output: rm -rf /
          [root@10.0.0.1] output: everything gone
     """
+    instance = Instance.objects.get(pk=instance_id)
+
+    with prefix(config.DTROVE_PREFIX), settings(**instance.connection_info):
+        map(run, cmds)
+
+    # Always remember to disconnect ssh sessions
+    disconnect_all()

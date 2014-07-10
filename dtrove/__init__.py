@@ -67,3 +67,10 @@ class config():
     #:     [('path.to.Manager', 'manager_name'), ...]
     #:
     DTROVE_DATASTORE_MANAGERS = _get('DTROVE_DATASTORE_MANAGERS', _MANAGERS)
+
+    #: Prefix for the remote commands this has access to all the instance
+    #: properties. EX::
+    #:
+    #:     DTROVE_PREFIX = 'sudo /usr/sbin/vzctl exec %(local_id)s '
+    #:
+    DTROVE_PREFIX = _get('DTROVE_PREFIX', 'sudo ')
