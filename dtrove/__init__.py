@@ -1,6 +1,6 @@
 """
-DTrove Configuration
-====================
+Configuration Options
+=====================
 
 This extends the normal django settings module so we can simply call::
 
@@ -12,9 +12,14 @@ and document them as well as provide some defaults and warnings.
 To modify any of these values simply edit your django settings file.
 
 """
+from __future__ import absolute_import
+
 import logging
 
 from django.conf import settings
+
+# The celery app must be loaded here to make the @shared_task decorator work.
+from .celery import app as celery_app
 
 
 def _get(name, default=None, warn=False):
