@@ -70,19 +70,8 @@ from dtrove import config
 from dtrove.models import Instance
 
 
-@shared_task
-def add(x, y):
-    return x + y
-
-
-@shared_task
-def mul(x, y):
-    return x * y
-
-
-@shared_task
-def xsum(numbers):
-    return sum(numbers)
+def runner(cmd):
+    return run(cmd % env)
 
 
 @shared_task
@@ -91,7 +80,7 @@ def preform(instance_id, name, *cmds):
     instance = Instance.objects.get(pk=instance_id)
 
     with settings(**instance.connection_info):
-        map(run, cmds)
+        map(runner, cmds)
 
     # Always remember to disconnect ssh sessions
     disconnect_all()

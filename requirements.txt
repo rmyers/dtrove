@@ -7,3 +7,4 @@ coverage
 coveralls
 django_openstack_auth
 sphinx
+mock

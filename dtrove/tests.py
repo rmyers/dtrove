@@ -1,5 +1,6 @@
 
 from django.test import TestCase
+from mock import patch
 
 from dtrove import models
 
@@ -36,7 +37,11 @@ def create_instance(name='test_instance', cluster=None, key=None,
                            addr=addr, user=user, server=server)
 
 
-class InstanceModelTests(TestCase):
+class DtroveTest(TestCase):
+    pass
+
+
+class InstanceModelTests(DtroveTest):
 
     def setUp(self):
         self.instance = create_instance()
@@ -53,7 +58,7 @@ class InstanceModelTests(TestCase):
         self.assertEqual(u'test_instance', unicode(self.instance))
 
 
-class ClusterModelTests(TestCase):
+class ClusterModelTests(DtroveTest):
 
     def setUp(self):
         self.cluster = create_cluster()
@@ -65,7 +70,7 @@ class ClusterModelTests(TestCase):
         self.assertEqual(u'spawning', self.cluster.status)
 
 
-class DatastoreModelTests(TestCase):
+class DatastoreModelTests(DtroveTest):
 
     def setUp(self):
         self.datastore = create_datastore()
@@ -74,10 +79,37 @@ class DatastoreModelTests(TestCase):
         self.assertEqual(u'mysql - 1.0', unicode(self.datastore))
 
 
-class KeyModelTests(TestCase):
+class KeyModelTests(DtroveTest):
 
     def setUp(self):
         self.key = create_key()
 
     def test_unicode(self):
         self.assertEqual(u'testkey', unicode(self.key))
+
+
+class TaskTests(DtroveTest):
+
+    def setUp(self):
+        self.ds = create_datastore()
+        self.ds.save()
+        self.cluster = create_cluster(datastore=self.ds)
+        self.cluster.save()
+        self.key = create_key()
+        self.key.save()
+        self.instance = create_instance(cluster=self.cluster, key=self.key)
+        self.instance.save()
+
+    def test_debug(self):
+        from dtrove.celery import debug_task
+        output = debug_task()
+        self.assertEqual('Request: <Context: {}>', output)
+
+    def test_perform(self):
+        from dtrove.tasks import preform
+        from fabric.api import env
+        with patch('dtrove.tasks.run') as fake_run:
+            cmd = '%(key)s %(password)s %(host_string)s'
+            expected = 'sec none root@127.0.0.1'
+            output = preform(self.instance.pk, '', cmd)
+            fake_run.assert_called_with('sec none root@127.0.0.1')
