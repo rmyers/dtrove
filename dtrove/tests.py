@@ -76,7 +76,7 @@ class DatastoreModelTests(DtroveTest):
         self.datastore = create_datastore()
 
     def test_unicode(self):
-        self.assertEqual(u'mysql - 1.0', unicode(self.datastore))
+        self.assertEqual(u'mysql-1.0', unicode(self.datastore))
 
 
 class KeyModelTests(DtroveTest):

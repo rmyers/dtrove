@@ -8,10 +8,7 @@ from dtrove.forms import KeystoneForm
 urlpatterns = patterns(
     'dtrove.views',
     url(r'^$', 'home', name='home'),
-    # create a new cluster
-    url(r'^cluster/$', 'cluster', name='cluster'),
-    # cluster details
-    url(r'^cluster/(?P<cluster_id>\d+)/', 'details', name='details'),
+    url(r'^api/', include('dtrove.api.urls')),
     url(r'^signout/$', auth_views.logout),
     url(r'^signin/$', auth_views.login,
         {'authentication_form': KeystoneForm},

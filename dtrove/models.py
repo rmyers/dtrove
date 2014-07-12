@@ -113,7 +113,7 @@ class Datastore(models.Model):
     @property
     def name(self):
         """The display name of the datastore (manager.name - version)"""
-        return '%s - %s' % (self.manager.name, self.version)
+        return '%s-%s' % (self.manager.name, self.version)
 
 
 class Key(models.Model):

@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'djcelery',
     'openstack_auth',
     'dtrove',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
