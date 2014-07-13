@@ -10,12 +10,12 @@ from rest_framework import serializers
 from dtrove.models import Cluster, Instance, Datastore
 
 
-class DatastoreSerializer(serializers.ModelSerializer):
+class DatastoreSerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.Field(source='name')
 
     class Meta:
         model = Datastore
-        fields = ['id', 'name', 'version']
+        fields = ['id', 'name', 'version', 'url']
 
 
 class ClusterSerializer(serializers.ModelSerializer):

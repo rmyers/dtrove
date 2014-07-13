@@ -11,7 +11,7 @@ from dtrove.models import Datastore, Cluster
 from .serializers import DatastoreSerializer, ClusterSerializer
 
 
-class DatastoreList(generics.ListCreateAPIView):
+class DatastoreList(generics.ListAPIView):
     model = Datastore
     serializer_class = DatastoreSerializer
     permission_classes = [

@@ -7,11 +7,5 @@ from dtrove.forms import KeystoneForm
 
 urlpatterns = patterns(
     'dtrove.views',
-    url(r'^$', 'home', name='home'),
     url(r'^api/', include('dtrove.api.urls')),
-    url(r'^signout/$', auth_views.logout),
-    url(r'^signin/$', auth_views.login,
-        {'authentication_form': KeystoneForm},
-        name="signin"),
-    url(r'^admin/', include(admin.site.urls)),
 )

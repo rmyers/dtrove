@@ -5,7 +5,6 @@ django-celery
 pep8
 coverage
 coveralls
-django_openstack_auth
 djangorestframework
 markdown
 sphinx

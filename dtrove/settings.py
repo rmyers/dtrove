@@ -1,24 +1,16 @@
 """
-Django settings for dtrove project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/dev/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/dev/ref/settings/
+Django test settings for dtrove project.
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '2mux&9x+nb$dn(&px%)+gxv=a193e_rb-dr%mtfmi4!qjz8fps'
+SECRET_KEY = 'fake_secret_key'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,14 +23,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'djcelery',
-    'openstack_auth',
     'dtrove',
     'rest_framework',
 )
@@ -54,8 +38,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'dtrove.urls'
-
-WSGI_APPLICATION = 'dtrove.wsgi.application'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
@@ -90,18 +72,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
-
-# OPENSTACK AUTH
-OPENSTACK_KEYSTONE_URL = "https://identity.api.rackspacecloud.com/v2.0"
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'dtrove.auth.RaxBackend',
-]
-AVAILABLE_REGIONS = [
-    ("https://identity.api.rackspacecloud.com/v2.0", 'ORD'),
-    ("https://identity.api.rackspacecloud.com/v2.0", 'DFW'),
-]
-
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-)
