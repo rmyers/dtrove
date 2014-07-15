@@ -19,8 +19,10 @@ class DatastoreSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ClusterSerializer(serializers.ModelSerializer):
-    datastore = DatastoreSerializer()
+    datastore = DatastoreSerializer(read_only=True)
+    datastore_id = serializers.PrimaryKeyRelatedField(source='datastore',
+                                                      write_only=True)
 
     class Meta:
         model = Cluster
-        fields = ['id', 'name', 'size', 'datastore', 'created']
+        fields = ['id', 'name', 'size', 'datastore', 'datastore_id', 'created']
