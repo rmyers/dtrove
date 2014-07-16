@@ -43,6 +43,7 @@ running on all compute hosts.
 
 .. toctree::
    datastores
+   providers
    tasks
    models
    :maxdepth: 1
