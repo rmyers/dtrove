@@ -1,6 +1,4 @@
 """
-Cloud Providers
-===============
 
 This is the interface that the provisioning system uses to create new
 nodes/volumes/backups for the clusters.

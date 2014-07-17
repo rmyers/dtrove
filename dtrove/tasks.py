@@ -62,6 +62,8 @@ These tasks handle creating and managing the servers themselves.
 
 from __future__ import absolute_import
 
+from time import sleep
+
 from celery import shared_task
 from fabric.api import run, env, settings, prefix
 from fabric.network import disconnect_all
@@ -84,3 +86,27 @@ def preform(instance_id, name, *cmds):
 
     # Always remember to disconnect ssh sessions
     disconnect_all()
+
+
+@shared_task
+def sleeper(instance_id, name):
+    instance = Instance.objects.get(pk=instance_id)
+    print('Instance: %s' % instance.server)
+    instance.server = name
+    instance.save()
+    sleep(3)
+    return instance_id
+
+
+@shared_task
+def task_fail(instance_id):
+    raise AttributeError('boo')
+
+
+@shared_task
+def onerror(uuid, instance_id=None):
+    instance = Instance.objects.get(pk=instance_id)
+    print('Instance: %s' % instance.server)
+    instance.server = 'Failed'
+    instance.save()
+    print('%s' % instance.server)

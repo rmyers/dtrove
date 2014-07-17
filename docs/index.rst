@@ -2,55 +2,77 @@
 Welcome to DTrove's documentation!
 ==================================
 
+Fork of `openstack trove`_ written in Django
 
-Setup Management API
+The main difference is that the this project does not use a guest agent on the
+host machines. Instead all the commands to manage the instances are done either
+thru ssh or the console on the compute hosts.
+
+If you like the project `fork it on github`_.
+
+.. _openstack trove: http://wiki.openstack.org/wiki/Trove
+.. _fork it on github: https://github.com/rmyers/dtrove
+
+Quickstart Guide
 ---------------------
 
 The main way to run dtrove is in single superuser. Basically using the same
-account to create all database clusters. All actions are handled thru the
-management api.
+account to create all database clusters. The plan is to make the api honor
+the same access controls as the :ref:`providers` you have chosen.
 
-To setup single user mode just add a few settings in your django settings
-file. For Nova set the following:
+Install
+~~~~~~~
 
-* `NOVA_USERNAME`: OS_USERNAME of the nova user.
-* `NOVA_PASSWORD`: OS_PASSWORD for the nova user.
-* `NOVA_PROJECT_ID`: OS_TENANT_ID or OS_PROJECT_ID of the nova user.
-* `NOVA_URL`: The url of the identity service for nova.
-* `NOVA_BYPASS_URL`: Actual url to use instead of the endpoint from the catalog.
-* `NOVA_ENDPOINT_TYPE`: (publicURL) Type of the nova endpoint.
+You have to go bleeding edge on a project like this, so break out your
+trusty `git` tool and prepare to get dirty
 
-If you are missing one and they are required to run you will receive a runtime
-error with the appropriate list of settings you are missing.
+1. Clone this repository::
 
-Management Method
------------------
+    $ git clone https://github.com/rmyers/dtrove.git
+    $ cd dtrove
+    $ mkvirtualenv dtrove -r requirements.txt
+    $ pip install -e .
 
-There are two ways to manage the hosts in dtrove. There is no guest agent in
-dtrove which is by design as the server is the brain of the operation and tells
-the guests what to do.
+2. Now you are ready to add this to your django settings file::
 
-* `SSH`: A special user is added to the hosts with sudo access and public key auth.
-* `Console`: If you have access to the compute hosts you can run a remote worker.
+    INSTALLED_APPS = (
+        ...
+        'dtrove',
+        'rest_framework',
+    )
 
-For running with ssh you'll need to create a public/private ssh key:
+3. For the default Openstack Provider set the following::
 
-    $ ssh_key_gen my_key.rsa
+    OS_USERNAME=your_nova_user.
+    OS_PASSWORD=your_password
+    OS_PROJECT_ID=your_project_id
+    OS_NOVA_URL=http://localhost:5000
 
-For running with a console access you need to make sure the celery worker is
-running on all compute hosts.
+  .. note:: See the :ref:`config` for details about all the options available.
 
+4. First run the migrations::
+
+    $ python manage.py migrate
+
+
+Creating Clusters
+~~~~~~~~~~~~~~~~~
+
+First
+
+Further Reading
+---------------
+
+See the following sections for more details on the setup of dtrove.
 
 .. toctree::
    datastores
    providers
    tasks
    models
+   config
    :maxdepth: 1
 
-
-.. automodule:: dtrove
-   :members:
 
 Indices and tables
 ==================

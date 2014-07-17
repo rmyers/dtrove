@@ -1,6 +1,4 @@
 """
-Configuration Options
-=====================
 
 This extends the normal django settings module so we can simply call::
 
