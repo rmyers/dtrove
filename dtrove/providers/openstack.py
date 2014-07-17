@@ -70,7 +70,8 @@ class Provider(BaseProvider):
         name = cluster.name + '_node'
         image = datastore.image
         key = instance.key
-        flavor = '2' # TODO: don't hard code this
+        # TODO: don't hard code this
+        flavor = '2'
         # First create a keypair to log in with
         self.nova.keypair.create(name=key.name, public_key=key.public)
         server = self.nova.servers.create(name=name,

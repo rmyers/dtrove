@@ -198,6 +198,16 @@ class Instance(models.Model):
         return self.name
 
     @property
+    def server_status(self):
+        if not self.server:
+            return 'None'
+        return self._server_status
+
+    @server_status.setter
+    def server_status(self, status):
+        self._server_status = status
+
+    @property
     def connection_info(self):
         """Provides the connection info from the key stored for this server"""
         kwargs = {
