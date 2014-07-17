@@ -105,3 +105,10 @@ class BaseProvider(object):
 
         """
         raise NotImplementedError()
+
+    def flavors(self, datastore=None):
+        """Return a list of flavors available
+
+        :param str datastore: (optional) datastore to filter flavors by
+        """
+        raise NotImplementedError()

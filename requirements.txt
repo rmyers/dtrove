@@ -9,3 +9,7 @@ djangorestframework
 markdown
 sphinx
 mock
+# TODO (rmyers): Move these to another requirements.txt
+python-novaclient
+python-cinderclient
+python-keystoneclient

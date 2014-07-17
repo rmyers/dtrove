@@ -42,23 +42,23 @@ class config():
     These are set or overridden in the django settings file.
     """
 
-    #: The nova management username
-    NOVA_USERNAME = _get('NOVA_USERNAME', warn=True)
+    #: The openstack management username
+    OS_USERNAME = _get('OS_USERNAME', warn=True)
 
-    #: The nova management user's password
-    NOVA_PASSWORD = _get('NOVA_PASSWORD', warn=True)
+    #: The openstack management user's password
+    OS_PASSWORD = _get('OS_PASSWORD', warn=True)
 
-    #: OS_TENANT_ID or OS_PROJECT_ID of the nova user.
-    NOVA_PROJECT_ID = _get('NOVA_PROJECT_ID', warn=True)
+    #: OS_TENANT_ID or OS_PROJECT_ID of the openstack user.
+    OS_PROJECT_ID = _get('OS_PROJECT_ID', warn=True)
 
-    #: The url of the identity service for nova.
-    NOVA_URL = _get('NOVA_URL', 'http://0.0.0.0:5000/v2.0')
+    #: The url of the identity service for openstack.
+    OS_AUTH_URL = _get('OS_AUTH_URL', 'http://0.0.0.0:5000/v2.0')
 
     #: Actual url to use instead of the endpoint from the catalog.
-    NOVA_BYPASS_URL = _get('NOVA_BYPASS_URL')
+    OS_NOVA_BYPASS_URL = _get('OS_NOVA_BYPASS_URL')
 
     #: Type of the nova endpoint.
-    NOVA_ENDPOINT_TYPE = _get('NOVA_ENDPOINT_TYPE', 'publicURL')
+    OS_NOVA_ENDPOINT_TYPE = _get('OS_NOVA_ENDPOINT_TYPE', 'publicURL')
 
     #: List of available datastores. This should be a list of tuples::
     #:
@@ -72,3 +72,7 @@ class config():
     #:     DTROVE_PREFIX = 'sudo /usr/sbin/vzctl exec %(local_id)s '
     #:
     DTROVE_PREFIX = _get('DTROVE_PREFIX', 'sudo ')
+
+    #: The :ref:`providers` that you have enabled.
+    DTROVE_PROVIDER = _get('DTROVE_PROVIDER',
+                           'dtrove.providers.openstack.Provider')
