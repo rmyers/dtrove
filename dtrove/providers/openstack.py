@@ -33,14 +33,15 @@ class Provider(BaseProvider):
         while True:
             obj = self.nova.servers.get(instance.server)
 
-            # TODO: do something with the status
-            server_status = getattr(obj, 'status', 'none').lower()
-            progress = getattr(obj, 'progress', None) or 0
+            instance.server_status = getattr(obj, 'status', 'none').lower()
+            instance.progress = getattr(obj, 'progress', None) or 0
 
-            if status in ['active']:
+            if instance.server_status in ['active']:
+                instance.progress = 100
                 break
-            elif status == "error":
-                raise Exception(obj.fault['message'])
+            elif instance.server_status == "error":
+                instance.message = obj.fault['message']
+                raise Exception(instance.message)
 
             time.sleep(5)
 
@@ -53,6 +54,7 @@ class Provider(BaseProvider):
             if endpoint.get('region', '') == self.region_name:
                 return endpoint.get('publicURL')
 
+    @property
     def nova(self):
         if self.auth_token is None:
             self._auth()
@@ -64,16 +66,40 @@ class Provider(BaseProvider):
                                   auth_url=self.auth_url,
                                   bypass_url=self.url('compute'))
 
-    def create(instance):
+    def update_status(self, instance):
+        if not instance.server:
+            return 'NA', 0
+        obj = self.nova.servers.get(instance.server)
+
+        status = getattr(obj, 'status', 'none').lower()
+        progress = getattr(obj, 'progress', None) or 0
+
+        instance.server_status = status
+        instance.progress = progress
+        return status, progress
+
+    def create_key(self, key):
+        try:
+            existing = self.nova.keypairs.get(key.name)
+        except:
+            self.nova.keypairs.create(name=key.name, public_key=key.public)
+
+    def create(self, instance):
         cluster = instance.cluster
         datastore = cluster.datastore
-        name = cluster.name + '_node'
         image = datastore.image
         key = instance.key
         # TODO: don't hard code this
         flavor = '2'
         # First create a keypair to log in with
-        self.nova.keypair.create(name=key.name, public_key=key.public)
-        server = self.nova.servers.create(name=name,
+        self.create_key(key)
+        server = self.nova.servers.create(name=instance.name,
                                           image=image,
-                                          flavor=flavor,)
+                                          flavor=flavor,
+                                          key_name=key.name)
+        time.sleep(3)
+        server = self.nova.servers.get(server.id)
+        instance.server = server.id
+        instance.addr = server.accessIPv4
+        instance.save()
+        self._poll(instance)

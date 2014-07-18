@@ -28,9 +28,14 @@ Available models
 
 """
 
+from django.core.cache import caches
 from django.db import models
 
 from dtrove import config
+from dtrove.providers import get_provider
+
+CACHE = caches['default']
+PROVIDER = get_provider()
 
 
 class Cluster(models.Model):
@@ -199,13 +204,42 @@ class Instance(models.Model):
 
     @property
     def server_status(self):
+        """Status of the server"""
         if not self.server:
-            return 'None'
-        return self._server_status
+            return 'NA'
+        status = CACHE.get('status:%s' % self.server)
+        if status is None:
+            status, progress = PROVIDER.update_status(self)
+            return status
 
     @server_status.setter
     def server_status(self, status):
-        self._server_status = status
+        CACHE.set('status:%s' % self.server, status)
+
+    @property
+    def progress(self):
+        """Progress of the current server task"""
+        if not self.server:
+            return 0
+        progress = CACHE.get('progress:%s' % self.server)
+        if progress is None:
+            status, progress = PROVIDER.update_status(self)
+            return progress
+
+    @progress.setter
+    def progress(self, percent):
+        CACHE.set('progress:%s' % self.server, percent)
+
+    @property
+    def message(self):
+        """Error message of the last server task"""
+        if not self.server:
+            return ''
+        return CACHE.get('message:%s' % self.server, '')
+
+    @message.setter
+    def message(self, msg):
+        CACHE.set('message:%s' % self.server, msg)
 
     @property
     def connection_info(self):
