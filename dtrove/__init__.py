@@ -76,3 +76,9 @@ class config():
     #: The :ref:`providers` that you have enabled.
     DTROVE_PROVIDER = _get('DTROVE_PROVIDER',
                            'dtrove.providers.openstack.Provider')
+
+    #: Default SSH user to use when connecting to hosts
+    DTROVE_SSH_USER = _get('DTROVE_SSH_USER', 'root')
+
+    #: Max number of nodes in a cluster
+    DTROVE_MAX_CLUSTER_SIZE = _get('DTROVE_MAX_CLUSTER_SIZE', 5)

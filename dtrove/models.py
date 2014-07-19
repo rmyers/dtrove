@@ -28,7 +28,11 @@ Available models
 
 """
 
+import os
+from uuid import uuid4
+
 from django.core.cache import caches
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from dtrove import config
@@ -71,11 +75,12 @@ class Cluster(models.Model):
     def __unicode__(self):
         return self.name
 
-    @property
-    def status(self):
-        """Status of the cluster"""
-        # TODO (rmyers): implement this
-        return u'spawning'
+    def save(self, *args, **kwargs):
+        if self.size > config.DTROVE_MAX_CLUSTER_SIZE:
+            raise ValidationError('Cluster too large')
+        super(Cluster, self).save(*args, **kwargs)
+        for x in xrange(self.size):
+            Instance.objects.create(name=str(uuid4()), cluster=self)
 
 
 class Datastore(models.Model):
@@ -153,6 +158,19 @@ class Key(models.Model):
     def __unicode__(self):
         return self.name
 
+    @classmethod
+    def create(cls, save=True):
+        """Factory method to create a new private/public key pair"""
+        from Crypto.PublicKey import RSA
+        name = str(uuid4())
+        key = RSA.generate(2048, os.urandom)
+        public = key.exportKey('OpenSSH')
+        private = key.exportKey('PEM')
+        obj = cls.objects.create(name=name, public=public, private=private)
+        if save:
+            obj.save()
+        return obj
+
 
 class Instance(models.Model):
     """Instance
@@ -194,7 +212,7 @@ class Instance(models.Model):
     name = models.CharField(max_length=255)
     cluster = models.ForeignKey(Cluster)
     key = models.ForeignKey(Key, null=True, blank=True)
-    user = models.CharField(max_length=25, default='root')
+    user = models.CharField(max_length=25, default=config.DTROVE_SSH_USER)
     addr = models.GenericIPAddressField(null=True, blank=True)
     server = models.CharField(max_length=36, blank=True,
                               help_text='Nova server UUID')
@@ -205,12 +223,10 @@ class Instance(models.Model):
     @property
     def server_status(self):
         """Status of the server"""
-        if not self.server:
-            return 'NA'
         status = CACHE.get('status:%s' % self.server)
         if status is None:
             status, progress = PROVIDER.update_status(self)
-            return status
+        return status
 
     @server_status.setter
     def server_status(self, status):
@@ -219,12 +235,10 @@ class Instance(models.Model):
     @property
     def progress(self):
         """Progress of the current server task"""
-        if not self.server:
-            return 0
         progress = CACHE.get('progress:%s' % self.server)
         if progress is None:
             status, progress = PROVIDER.update_status(self)
-            return progress
+        return progress
 
     @progress.setter
     def progress(self, percent):
@@ -233,8 +247,6 @@ class Instance(models.Model):
     @property
     def message(self):
         """Error message of the last server task"""
-        if not self.server:
-            return ''
         return CACHE.get('message:%s' % self.server, '')
 
     @message.setter

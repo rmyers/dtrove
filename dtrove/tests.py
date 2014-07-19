@@ -1,4 +1,5 @@
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from mock import patch
 
@@ -62,12 +63,20 @@ class ClusterModelTests(DtroveTest):
 
     def setUp(self):
         self.cluster = create_cluster()
+        self.ds = create_datastore()
+        self.ds.save()
 
     def test_unicode(self):
         self.assertEqual(u'test_cluster', unicode(self.cluster))
 
-    def test_status(self):
-        self.assertEqual(u'spawning', self.cluster.status)
+    def test_max_cluster(self):
+        kwargs = {
+            'name': 'foo',
+            'size': 10,
+            'datastore': self.ds,
+        }
+        self.assertRaises(
+            ValidationError, models.Cluster.objects.create, **kwargs)
 
 
 class DatastoreModelTests(DtroveTest):
