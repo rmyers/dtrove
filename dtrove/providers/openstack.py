@@ -31,16 +31,12 @@ class Provider(BaseProvider):
 
     def _poll(self, instance):
         while True:
-            obj = self.nova.servers.get(instance.server)
+            status, progress = self.update_status(instance)
 
-            instance.server_status = getattr(obj, 'status', 'none').lower()
-            instance.progress = getattr(obj, 'progress', None) or 0
-
-            if instance.server_status in ['active']:
+            if status in ['active']:
                 instance.progress = 100
                 break
-            elif instance.server_status == "error":
-                instance.message = obj.fault['message']
+            elif status == "error":
                 raise Exception(instance.message)
 
             time.sleep(5)
@@ -74,8 +70,12 @@ class Provider(BaseProvider):
         status = getattr(obj, 'status', 'none').lower()
         progress = getattr(obj, 'progress', None) or 0
 
+        if status == "error":
+            instance.message = obj.fault['message']
+
         instance.server_status = status
         instance.progress = progress
+
         return status, progress
 
     def create_key(self, key):
