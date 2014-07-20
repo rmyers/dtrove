@@ -262,3 +262,8 @@ class Instance(models.Model):
             'host_string': '%s@%s' % (self.user, self.addr),
         }
         return kwargs
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = Key.create(save=True)
+        super(Instance, self).save(*args, **kwargs)
