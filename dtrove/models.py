@@ -28,6 +28,7 @@ Available models
 
 """
 
+import logging
 import os
 from uuid import uuid4
 
@@ -75,12 +76,26 @@ class Cluster(models.Model):
     def __unicode__(self):
         return self.name
 
+    def add_node(self, count=1):
+        """Add a node to the cluster."""
+        current_count = self.instance_set.count()
+        new_size = current_count + count
+        if new_size > config.DTROVE_MAX_CLUSTER_SIZE:
+            raise ValidationError('Cluster too large')
+        for x in xrange(count):
+            Instance.objects.create(name=str(uuid4()), cluster=self)
+        if new_size != self.size:
+            self.size = new_size
+            self.save()
+
     def save(self, *args, **kwargs):
         if self.size > config.DTROVE_MAX_CLUSTER_SIZE:
             raise ValidationError('Cluster too large')
+        # Check whether this cluster is new.
+        created = not self.pk
         super(Cluster, self).save(*args, **kwargs)
-        for x in xrange(self.size):
-            Instance.objects.create(name=str(uuid4()), cluster=self)
+        if created:
+            self.add_node(self.size)
 
 
 class Datastore(models.Model):
@@ -263,7 +278,13 @@ class Instance(models.Model):
         }
         return kwargs
 
+    def provision(self):
+        logging.error('WAIT DO NOT REALLY DO IT!')
+
     def save(self, *args, **kwargs):
         if not self.key:
             self.key = Key.create(save=True)
+        created = not self.pk
         super(Instance, self).save(*args, **kwargs)
+        if created:
+            self.provision()

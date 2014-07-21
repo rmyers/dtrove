@@ -1,41 +1,54 @@
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from mock import patch
+from mock import patch, MagicMock
 
 from dtrove import models
 
 
 # Helper methods
-def create_datastore(manager=None):
+def create_datastore(manager=None, save=False):
     if manager is None:
         manager = 'dtrove.datastores.mysql.MySQLManager'
-    return models.Datastore(manager_class=manager, version='1.0', image='none')
+    ds = models.Datastore(manager_class=manager, version='1.0', image='none')
+    if save:
+        ds.save()
+    return ds
 
 
-def create_cluster(name='test_cluster', datastore=None):
+def create_cluster(name='test_cluster', datastore=None, size=0, save=False):
     if datastore is None:
-        datastore = create_datastore()
-    return models.Cluster(name=name, datastore=datastore)
+        datastore = create_datastore(save=save)
+    cluster = models.Cluster(name=name, datastore=datastore, size=size)
+    if save:
+        cluster.save()
+    return cluster
 
 
-def create_key(name='testkey', passphrase='none', private='sec', public='pub'):
-    return models.Key(name=name,
-                      passphrase=passphrase,
-                      private=private,
-                      public=public)
+def create_key(name='testkey', passphrase='none', private='sec',
+               public='pub', save=False):
+    key = models.Key(name=name,
+                     passphrase=passphrase,
+                     private=private,
+                     public=public)
+    if save:
+        key.save()
+    return key
 
 
-def create_instance(name='test_instance', cluster=None, key=None,
+def create_instance(name='test_instance', save=False, cluster=None, key=None,
                     addr='127.0.0.1', user='root', server='test_server'):
     if cluster is None:
-        cluster = create_cluster()
+        cluster = create_cluster(save=save)
 
     if key is None:
-        key = create_key()
+        key = create_key(save=save)
 
-    return models.Instance(name=name, cluster=cluster, key=key,
-                           addr=addr, user=user, server=server)
+    instance = models.Instance(name=name, cluster=cluster, key=key,
+                               addr=addr, user=user, server=server)
+    if save:
+        instance.save()
+    return instance
 
 
 class DtroveTest(TestCase):
@@ -62,9 +75,10 @@ class InstanceModelTests(DtroveTest):
 class ClusterModelTests(DtroveTest):
 
     def setUp(self):
-        self.cluster = create_cluster()
-        self.ds = create_datastore()
-        self.ds.save()
+        patcher = patch('dtrove.models.Instance.provision')
+        self.MockClass = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.cluster = create_cluster(size=2, save=True)
 
     def test_unicode(self):
         self.assertEqual(u'test_cluster', unicode(self.cluster))
@@ -73,10 +87,27 @@ class ClusterModelTests(DtroveTest):
         kwargs = {
             'name': 'foo',
             'size': 10,
-            'datastore': self.ds,
+            'datastore': self.cluster.datastore,
         }
         self.assertRaises(
             ValidationError, models.Cluster.objects.create, **kwargs)
+
+    def test_instance_creation_on_save(self):
+        self.cluster.save()
+        self.assertEqual(2, self.cluster.instance_set.count())
+
+    def test_multiple_saves(self):
+        self.cluster.save()
+        self.assertEqual(2, self.cluster.instance_set.count())
+        self.cluster.save()
+        self.assertEqual(2, self.cluster.instance_set.count())
+
+    def test_add_node(self):
+        self.cluster.save()
+        self.assertEqual(2, self.cluster.instance_set.count())
+        self.cluster.add_node()
+        self.assertEqual(3, self.cluster.instance_set.count())
+        self.assertEqual(3, self.cluster.size)
 
 
 class DatastoreModelTests(DtroveTest):
@@ -100,14 +131,11 @@ class KeyModelTests(DtroveTest):
 class TaskTests(DtroveTest):
 
     def setUp(self):
-        self.ds = create_datastore()
-        self.ds.save()
-        self.cluster = create_cluster(datastore=self.ds)
-        self.cluster.save()
-        self.key = create_key()
-        self.key.save()
-        self.instance = create_instance(cluster=self.cluster, key=self.key)
-        self.instance.save()
+        self.cluster = create_cluster(size=0, save=True)
+        self.key = create_key(save=True)
+        self.instance = create_instance(cluster=self.cluster,
+                                        key=self.key,
+                                        save=True)
 
     def test_debug(self):
         from dtrove.celery import debug_task
