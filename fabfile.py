@@ -30,6 +30,7 @@ def test(skip_js='False'):
         #with lcd('assets'):
             #local('node_modules/grunt-cli/bin/grunt jasmine')
     pep8()
+    local("coverage html")
 
 
 @task
