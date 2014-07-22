@@ -279,7 +279,8 @@ class Instance(models.Model):
         return kwargs
 
     def provision(self):
-        logging.error('WAIT DO NOT REALLY DO IT!')
+        from dtrove.tasks import create
+        return create.delay(self)
 
     def save(self, *args, **kwargs):
         if not self.key:

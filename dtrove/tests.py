@@ -71,6 +71,39 @@ class InstanceModelTests(DtroveTest):
     def test_unicode(self):
         self.assertEqual(u'test_instance', unicode(self.instance))
 
+    def test_status(self):
+        with patch('dtrove.models.PROVIDER') as prov:
+            prov.update_status.return_value = ('building', 10)
+            self.assertEqual('building', self.instance.server_status)
+            prov.update_status.assert_called_with(self.instance)
+
+    def test_set_status(self):
+        instance = create_instance(server='status_setter')
+        instance.server_status = 'building'
+        self.assertEqual('building', instance.server_status)
+
+    def test_progress(self):
+        with patch('dtrove.models.PROVIDER') as prov:
+            prov.update_status.return_value = ('building', 10)
+            self.assertEqual(10, self.instance.progress)
+            prov.update_status.assert_called_with(self.instance)
+
+    def test_set_progress(self):
+        instance = create_instance(server='progress_setter')
+        instance.progress = 24
+        self.assertEqual(24, instance.progress)
+
+    def test_message(self):
+        instance = create_instance(server='message_getter')
+        self.assertEqual('', instance.message)
+        instance.message = 'I am a message'
+        self.assertEqual('I am a message', instance.message)
+
+    def test_provision(self):
+        with patch('dtrove.tasks.create') as task:
+            instance = create_instance(server='', save=True)
+            task.delay.assert_called_with(instance)
+
 
 class ClusterModelTests(DtroveTest):
 
@@ -109,6 +142,10 @@ class ClusterModelTests(DtroveTest):
         self.assertEqual(3, self.cluster.instance_set.count())
         self.assertEqual(3, self.cluster.size)
 
+    def test_add_too_large(self):
+        self.cluster.save()
+        self.assertRaises(ValidationError, self.cluster.add_node, 5)
+
 
 class DatastoreModelTests(DtroveTest):
 
@@ -131,7 +168,10 @@ class KeyModelTests(DtroveTest):
 class TaskTests(DtroveTest):
 
     def setUp(self):
-        self.cluster = create_cluster(size=0, save=True)
+        patcher = patch('dtrove.models.Instance.provision')
+        self.MockClass = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.cluster = create_cluster(size=2, save=True)
         self.key = create_key(save=True)
         self.instance = create_instance(cluster=self.cluster,
                                         key=self.key,
@@ -150,3 +190,20 @@ class TaskTests(DtroveTest):
             expected = 'sec none root@127.0.0.1'
             output = preform(self.instance.pk, '', cmd)
             fake_run.assert_called_with('sec none root@127.0.0.1')
+
+    def test_create(self):
+        from dtrove.tasks import create
+        instance_id = create(self.instance.pk)
+        self.assertEqual(self.instance.pk, instance_id)
+
+
+class ProviderTests(DtroveTest):
+
+    def test_base_provider(self):
+        from dtrove.providers.base import BaseProvider
+        provider = BaseProvider()
+        self.assertRaises(NotImplementedError, provider.create, '')
+        self.assertRaises(NotImplementedError, provider.destroy, '')
+        self.assertRaises(NotImplementedError, provider.snapshot, '')
+        self.assertRaises(NotImplementedError, provider.attach_volume, '')
+        self.assertRaises(NotImplementedError, provider.flavors, '')
