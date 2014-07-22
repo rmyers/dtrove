@@ -91,7 +91,6 @@ def preform(instance_id, name, *cmds):
 @shared_task
 def create(instance_id):
     instance = Instance.objects.get(pk=instance_id)
-    #print('Instance: %s' % instance.server)
     instance.server_status = 'building'
     sleep(3)
     instance.server_status = 'active'
