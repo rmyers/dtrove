@@ -1,4 +1,6 @@
 
+from collections import namedtuple
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from mock import patch, MagicMock
@@ -49,6 +51,10 @@ def create_instance(name='test_instance', save=False, cluster=None, key=None,
     if save:
         instance.save()
     return instance
+
+# Openstack mock response classes
+OSServer = namedtuple('OpenstackServer',
+                      ['accessIPv4', 'id', 'status', 'progress', 'fault'])
 
 
 class DtroveTest(TestCase):
@@ -197,13 +203,78 @@ class TaskTests(DtroveTest):
         self.assertEqual(self.instance.pk, instance_id)
 
 
-class ProviderTests(DtroveTest):
+class BaseProviderTests(DtroveTest):
 
-    def test_base_provider(self):
+    def setUp(self):
         from dtrove.providers.base import BaseProvider
-        provider = BaseProvider()
-        self.assertRaises(NotImplementedError, provider.create, '')
-        self.assertRaises(NotImplementedError, provider.destroy, '')
-        self.assertRaises(NotImplementedError, provider.snapshot, '')
-        self.assertRaises(NotImplementedError, provider.attach_volume, '')
-        self.assertRaises(NotImplementedError, provider.flavors, '')
+        self.provider = BaseProvider()
+
+    def test_base_create(self):
+        self.assertRaises(NotImplementedError, self.provider.create, '')
+
+    def test_base_destroy(self):
+        self.assertRaises(NotImplementedError, self.provider.destroy, '')
+
+    def test_base_snapshot(self):
+        self.assertRaises(NotImplementedError, self.provider.snapshot, '')
+
+    def test_base_attach_volume(self):
+        self.assertRaises(NotImplementedError, self.provider.attach_volume, '')
+
+    def test_base_flavors(self):
+        self.assertRaises(NotImplementedError, self.provider.flavors, '')
+
+    def test_get_provider(self):
+        from dtrove.providers.openstack import Provider
+        from dtrove.providers import get_provider
+        p = get_provider()
+        self.assertTrue(isinstance(p, Provider))
+
+
+class OpenStackProviderTests(DtroveTest):
+
+    def setUp(self):
+        from dtrove.providers.openstack import Provider
+        self.provider = Provider()
+        mock_nova = patch('dtrove.providers.openstack.nova_client')
+        self.MockNova = mock_nova.start()
+        self.addCleanup(mock_nova.stop)
+        mock_cinder = patch('dtrove.providers.openstack.cinder_client')
+        self.MockCinder = mock_cinder.start()
+        self.addCleanup(mock_cinder.stop)
+        mock_key = patch('dtrove.providers.openstack.keystone_client')
+        self.MockKeystone = mock_key.start()
+        self.addCleanup(mock_key.stop)
+        patcher = patch('dtrove.models.Instance.provision')
+        self.MockInstance = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.instance = create_instance(server='', save=True)
+        self.MockNova.Client = MagicMock()
+        self.MockNova.Client().servers = MagicMock()
+
+    def test_nova_client(self):
+        self.assertEqual(self.MockNova.Client(), self.provider.nova)
+        self.MockNova.Client.assert_called_with(
+            username='test_user',
+            project_id='12345',
+            region_name='IAD',
+            bypass_url=None,
+            auth_token=self.MockKeystone.Client().auth_ref.auth_token,
+            auth_url='http://localhost:5000/v2.0',
+            api_key='test_pass'
+        )
+
+    def test_create(self):
+        server = OSServer('127.0.0.1', 'uuid', 'active', 90, {})
+        self.MockNova.Client().servers.get.return_value = server
+        self.provider.create(self.instance)
+        self.assertEqual('active', self.instance.server_status)
+        self.assertEqual(100, self.instance.progress)
+
+    def test_create_error(self):
+        server = OSServer('127.0.0.1', 'id', 'error', 10, {'message': 'fail'})
+        self.MockNova.Client().servers.get.return_value = server
+        self.assertRaises(Exception, self.provider.create, self.instance)
+        self.assertEqual('error', self.instance.server_status)
+        self.assertEqual(10, self.instance.progress)
+        self.assertEqual('fail', self.instance.message)

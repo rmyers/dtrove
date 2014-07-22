@@ -72,3 +72,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Openstack Settings
+OS_USERNAME = 'test_user'
+OS_PASSWORD = 'test_pass'
+OS_PROJECT_ID = '12345'
+OS_AUTH_URL = 'http://localhost:5000/v2.0'
