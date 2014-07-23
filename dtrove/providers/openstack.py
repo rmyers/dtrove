@@ -45,7 +45,7 @@ class Provider(BaseProvider):
         if self.endpoints is None:
             self._auth()
 
-        service_endpoints = self.endpoints.get('service', [])
+        service_endpoints = self.endpoints.get(service, [])
         for endpoint in service_endpoints:
             if endpoint.get('region', '') == self.region_name:
                 return endpoint.get('publicURL')
