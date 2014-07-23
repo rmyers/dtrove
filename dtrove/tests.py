@@ -1,11 +1,19 @@
 
+import logging
 from collections import namedtuple
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from mock import patch, MagicMock
 
 from dtrove import models
+
+level = logging.INFO
+if settings.DEBUG:
+    level = logging.DEBUG
+
+logging.basicConfig(filename='test.log', level=level)
 
 
 # Helper methods
@@ -59,6 +67,25 @@ OSServer = namedtuple('OpenstackServer',
 
 class DtroveTest(TestCase):
     pass
+
+
+class ConfigTests(TestCase):
+
+    def setUp(self):
+        from dtrove import _get
+        self._get = _get
+
+    def test_get_config(self):
+        found = self._get('SECRET_KEY')
+        self.assertEqual(settings.SECRET_KEY, found)
+
+    def test_get_default(self):
+        default = self._get('MISSING_CONFIG_OPTION', 'gone')
+        self.assertEqual('gone', default)
+
+    def test_get_warning(self):
+        default = self._get('MISSING_CONFIG_OPTION', 'gone', warn=True)
+        self.assertEqual('gone', default)
 
 
 class InstanceModelTests(DtroveTest):
@@ -255,13 +282,13 @@ class OpenStackProviderTests(DtroveTest):
     def test_nova_client(self):
         self.assertEqual(self.MockNova.Client(), self.provider.nova)
         self.MockNova.Client.assert_called_with(
-            username='test_user',
-            project_id='12345',
+            username=settings.OS_USERNAME,
+            project_id=settings.OS_PROJECT_ID,
             region_name='IAD',
             bypass_url=None,
             auth_token=self.MockKeystone.Client().auth_ref.auth_token,
-            auth_url='http://localhost:5000/v2.0',
-            api_key='test_pass'
+            auth_url=settings.OS_AUTH_URL,
+            api_key=settings.OS_PASSWORD,
         )
 
     def test_create(self):
