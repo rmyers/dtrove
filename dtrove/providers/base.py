@@ -69,6 +69,32 @@ class BaseProvider(object):
         """
         raise NotImplementedError()
 
+    def update_status(self, instance):
+        """Updates the status of an instance
+
+        :param instance: An instance object to create
+        :type instance: :py:class:`dtrove.models.Instance`
+        :raises: :py:class:`dtrove.providers.base.ProviderError`
+            If the status failed
+        :returns: tuple of (status, progress)
+
+        A call to this method should set the properties on the instance. For
+        example here::
+
+            def update_status(self, instance):
+                obj = self.get(instance.id)
+
+                instance.message = obj.error_message
+                instance.server_status = obj.status
+                instance.progress = obj.progress
+
+                return instance.server_status, instance.progress
+
+        * `status` property should be a string of the current status
+        * `progress` property should be an int which is the percent complete
+        """
+        raise NotImplementedError()
+
     def destroy(self, instance):
         """Destroys an instance
 

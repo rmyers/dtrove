@@ -239,6 +239,9 @@ class BaseProviderTests(DtroveTest):
     def test_base_create(self):
         self.assertRaises(NotImplementedError, self.provider.create, '')
 
+    def test_base_update(self):
+        self.assertRaises(NotImplementedError, self.provider.update_status, '')
+
     def test_base_destroy(self):
         self.assertRaises(NotImplementedError, self.provider.destroy, '')
 
