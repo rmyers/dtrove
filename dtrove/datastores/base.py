@@ -52,3 +52,8 @@ class BaseManager(object):
 
     def backup():
         """Preform a backup on the remote instance."""
+        raise NotImplementedError()
+
+    def prepare():
+        """Install and configure the datastore on the instance."""
+        raise NotImplementedError()
