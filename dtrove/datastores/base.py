@@ -28,7 +28,9 @@ More on templates later.
 
 """
 
-from cStringIO import StringIO
+from django.template.loader import select_template
+from django.template import Context
+from fabric.api import run, env, put
 
 
 class BaseManager(object):
@@ -39,21 +41,55 @@ class BaseManager(object):
                       install on the guest vm's.
     """
 
+    #: Name of the service ie 'mysql'
+    service_name = None
+
     def __init__(self, datastore):
         """Creates a Manager"""
         self.datastore = datastore
         self.image = datastore.image
-        self.packages = datastore.packages
+        packages = datastore.packages.split('\n')
+        self.packages = map(lambda pkg: pkg.strip(), packages)
 
     @property
     def name(self):
         """Returns the name of the manager ex: MySQLManager = mysql"""
         return self.__class__.__name__.replace('Manager', '').lower()
 
-    def backup():
+    def backup(self, instance):
         """Preform a backup on the remote instance."""
         raise NotImplementedError()
 
-    def prepare():
+    def prepare(self, instance):
         """Install and configure the datastore on the instance."""
         raise NotImplementedError()
+
+    def render_config_file(self, instance):
+        """Load and render a config file for this datastore."""
+        context = Context({
+            'instance': instance,
+            'datastore': self.datastore,
+        })
+        lookup = {
+            'manager': self.name,
+            'name': self.datastore.name,
+            'version': self.datastore.version,
+        }
+        template = select_template([
+            '%(manager)s/%(name)s/%(version)s/config' % lookup,
+            '%(manager)s/%(name)s/config' % lookup,
+            '%(manager)s/config' % lookup,
+        ])
+        return template.render(context)
+
+    def restart(self):
+        """Restart the datastore."""
+        run('service %s restart' % self.service_name)
+
+    def stop(self):
+        """Stop the datastore"""
+        run('service %s stop' % self.service_name)
+
+    def start():
+        """Start the datastore"""
+        run('service %s start' % self.service_name)
