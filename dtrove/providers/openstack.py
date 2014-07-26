@@ -75,6 +75,9 @@ class Provider(BaseProvider):
 
         instance.server_status = status
         instance.progress = progress
+        if not instance.addr:
+            instance.addr = obj.accessIPv4
+            instance.save()
 
         return status, progress
 
@@ -90,7 +93,7 @@ class Provider(BaseProvider):
         image = datastore.image
         key = instance.key
         # TODO: don't hard code this
-        flavor = '2'
+        flavor = '3'
         # First create a keypair to log in with
         self.create_key(key)
         server = self.nova.servers.create(name=instance.name,
