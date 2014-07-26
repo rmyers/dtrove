@@ -135,7 +135,7 @@ class InstanceModelTests(DtroveTest):
     def test_provision(self):
         with patch('dtrove.tasks.create') as task:
             instance = create_instance(server='', save=True)
-            task.delay.assert_called_with(instance)
+            task.delay.assert_called_with(instance.pk)
 
 
 class ClusterModelTests(DtroveTest):
@@ -226,8 +226,11 @@ class TaskTests(DtroveTest):
 
     def test_create(self):
         from dtrove.tasks import create
-        instance_id = create(self.instance.pk)
-        self.assertEqual(self.instance.pk, instance_id)
+        with patch('dtrove.tasks.PROVIDER') as prov:
+            with patch('dtrove.tasks.prepare') as prepare:
+                create(self.instance.pk)
+                prov.create.assert_called_with(self.instance)
+                prepare.assert_called_with(self.instance.id)
 
 
 class BaseProviderTests(DtroveTest):

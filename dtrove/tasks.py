@@ -65,11 +65,15 @@ from __future__ import absolute_import
 from time import sleep
 
 from celery import shared_task
+from celery import chain
 from fabric.api import run, env, settings, prefix
 from fabric.network import disconnect_all
 
 from dtrove import config
 from dtrove.models import Instance
+from dtrove.providers import get_provider
+
+PROVIDER = get_provider()
 
 
 def runner(cmd):
@@ -90,8 +94,21 @@ def preform(instance_id, name, *cmds):
 
 @shared_task
 def create(instance_id):
+    chain(create_server(instance_id), prepare(instance_id))
+
+
+@shared_task
+def create_server(instance_id):
     instance = Instance.objects.get(pk=instance_id)
-    instance.server_status = 'building'
-    sleep(3)
-    instance.server_status = 'active'
-    return instance_id
+    PROVIDER.create(instance)
+
+
+@shared_task
+def prepare(instance_id):
+    instance = Instance.objects.get(pk=instance_id)
+    manager = instance.cluster.datastore.manager
+    with settings(**instance.connection_info):
+        manager.prepare(instance)
+
+    # Always remember to disconnect ssh sessions
+    disconnect_all()

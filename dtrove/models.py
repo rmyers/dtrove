@@ -280,7 +280,7 @@ class Instance(models.Model):
 
     def provision(self):
         from dtrove.tasks import create
-        return create.delay(self)
+        return create.delay(self.pk)
 
     def save(self, *args, **kwargs):
         if not self.key:
