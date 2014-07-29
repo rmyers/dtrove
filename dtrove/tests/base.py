@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from mock import patch, MagicMock
+from mock import patch, MagicMock, ANY, call
 
 from dtrove import models
 
@@ -15,10 +15,13 @@ if settings.DEBUG:
 logging.basicConfig(filename='test.log', level=level)
 
 
-def create_datastore(manager=None, save=False):
+def create_datastore(manager=None, packages='', save=False):
     if manager is None:
         manager = 'dtrove.datastores.mysql.MySQLManager'
-    ds = models.Datastore(manager_class=manager, version='1.0', image='none')
+    ds = models.Datastore(manager_class=manager,
+                          packages=packages,
+                          version='1.0',
+                          image='none')
     if save:
         ds.save()
     return ds
