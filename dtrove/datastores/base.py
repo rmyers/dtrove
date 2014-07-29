@@ -49,7 +49,8 @@ class BaseManager(object):
         self.datastore = datastore
         self.image = datastore.image
         packages = datastore.packages.split('\n')
-        self.packages = map(lambda pkg: pkg.strip(), packages)
+        # filter any blank lines and strip any hanging newlines
+        self.packages = filter(None, map(lambda pkg: pkg.strip(), packages))
 
     @property
     def name(self):
@@ -71,14 +72,12 @@ class BaseManager(object):
             'datastore': self.datastore,
         })
         lookup = {
-            'manager': self.name,
-            'name': self.datastore.name,
+            'name': self.datastore.manager.name,
             'version': self.datastore.version,
         }
         template = select_template([
-            '%(manager)s/%(name)s/%(version)s/config' % lookup,
-            '%(manager)s/%(name)s/config' % lookup,
-            '%(manager)s/config' % lookup,
+            '%(name)s/%(version)s/config' % lookup,
+            '%(name)s/config' % lookup,
         ])
         return template.render(context)
 
@@ -90,6 +89,6 @@ class BaseManager(object):
         """Stop the datastore"""
         run('service %s stop' % self.service_name)
 
-    def start():
+    def start(self):
         """Start the datastore"""
         run('service %s start' % self.service_name)
