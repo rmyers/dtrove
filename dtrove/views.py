@@ -15,7 +15,7 @@ SERVICE_CATALOG = {
         "serviceCatalog": [
             {
                 "endpoints": [
-                   {
+                    {
                         "publicURL": "http://localhost:8000/osnova/",
                         "region": "IAD",
                         "tenantId": "12345",
@@ -52,6 +52,7 @@ KEYPAIR = {
         "user_id": "fake"
     }
 }
+
 
 @csrf_exempt
 def fake_os_auth(request, path):
